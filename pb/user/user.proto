@@ -1,0 +1,46 @@
+syntax="proto3";//版本号
+
+package user;//proto分包
+
+option go_package="/user;user";
+
+import "google/api/annotations.proto";
+
+service UserService {
+  rpc Register(RegisterReq) returns (RegisterResp) {
+    option (google.api.http)={
+      post :"/api/v1/user/register"
+      body :"*"
+    };
+  }
+  rpc Login(LoginReq) returns (LoginResp) {
+    option (google.api.http)={
+      post :"/api/v1/user/login"
+      body :"*"
+    };
+  }
+}
+
+message RegisterReq {
+  string email = 1;
+  string password = 2;
+  string confirm_password = 3;
+  string username = 4;
+}
+
+message RegisterResp {
+  int32 user_id = 1;
+  bool  success =2;
+}
+
+message LoginReq {
+  string email= 1;
+  string password = 2;
+  string username =3 ;
+}
+
+message LoginResp {
+  int32 user_id = 1;
+  bool  success =2;
+  string token =3;
+}
