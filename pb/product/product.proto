@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package product;
+
+option go_package = "/product;product";
+
+import "google/api/annotations.proto";
+
+service ProductCatalogService {
+  rpc ListProducts(ListProductsReq) returns (ListProductsResp) {
+    option (google.api.http)={
+      get:"/v1/products"
+    };
+  }
+  rpc GetProduct(GetProductReq) returns (GetProductResp) {
+    option (google.api.http)={
+      get:"/v1/products/{id}"
+    };
+  }
+  rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp) {
+    option (google.api.http)={
+      get:"/v1/products/search"
+      additional_bindings{
+        get:"/v1/products/search/{query}"
+      }
+    };
+  }
+  rpc CreateProduct(CreateProductReq) returns (CreateProductResp) {
+    option (google.api.http)={
+      post:"/v1/products/create"
+      body:"*"
+    };
+  }
+}
+
+message ListProductsReq{
+  int32 page = 1;
+  int64 pageSize = 2;
+  string sort = 3;
+}
+
+message Product {
+  uint32 id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  float price = 5;
+  string sort =6;
+}
+
+message ListProductsResp {
+  repeated Product products = 1;
+}
+
+message GetProductReq {
+  uint32 id = 1;
+  string name=2;
+}
+
+message GetProductResp {
+  Product product = 1;
+}
+
+message SearchProductsReq {
+  string query = 1;
+}
+
+message SearchProductsResp {
+  repeated Product results = 1;
+}
+
+message CreateProductReq {
+  string name = 1;
+  string description = 2;
+  string picture = 3;
+  float price = 4;
+  string sort =5;
+}
+
+message CreateProductResp {
+  uint32 id = 1;
+  bool success = 2;
+}

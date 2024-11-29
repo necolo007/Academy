@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"Academy/Model"
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
@@ -20,25 +21,27 @@ func GenerateRandomToken() (string, error) {
 }
 
 // GenerateToken 生成JWT
-func GenerateToken(userID int32) (string, error) {
-	token_id, err := GenerateRandomToken()
+func GenerateToken(user Model.User) (string, error) {
+	tokenID, err := GenerateRandomToken()
 	if err != nil {
 		return "", err
 	}
-	claims := jwt.MapClaims{
-		"user_id":  userID,
-		"exp":      time.Now().Add(time.Hour * 2).Unix(), // 设置2小时有效期
-		"token_id": token_id,
+	claims := &Model.UserClaims{
+		UserId: user.ID,
+		Role:   user.Role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+			Id:        tokenID,
+			Issuer:    "cxr",
+		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtKey)
 }
 
-// VerifyToken 验证JWT
-func VerifyToken(tokenString string) (bool, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 确保使用的是相同的加密算法
+// ValidateToken VerifyToken 验证JWT
+func ValidateToken(tokenString string) (*Model.UserClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Model.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
@@ -46,12 +49,11 @@ func VerifyToken(tokenString string) (bool, error) {
 	})
 
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	// 验证 token 是否有效
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return true, nil
+	if claims, ok := token.Claims.(*Model.UserClaims); ok && token.Valid {
+		return claims, nil
 	}
-	return false, nil
+	return nil, jwt.ErrSignatureInvalid
 }

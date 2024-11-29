@@ -1,6 +1,8 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Product struct {
 	gorm.Model
@@ -8,5 +10,5 @@ type Product struct {
 	Description string  `gorm:"type:text"`
 	Picture     string  `gorm:"varchar(225)"`
 	Price       float64 `gorm:"type:decimal(10,2)"`
-	Categories  string  `gorm:"type:text"` //json字符串
+	Sort        string  `gorm:"not null"`
 }
